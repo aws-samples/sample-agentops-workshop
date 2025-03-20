@@ -98,7 +98,7 @@ class AiAgentPipelineStack(Stack):
             self, "FunctionalAgent",
             type="AWS::Bedrock::Agent",
             properties={
-                "AgentName": "ElectronicsManufacturingExpert",
+                "AgentName": "GeneralQuestionsExpert",
                 "AgentResourceRoleArn": agent_role.role_arn,
                 "FoundationModel": "anthropic.claude-3-sonnet-20240229-v1:0",
                 "Instruction": """You are a bedrock agent that answers general questions""",
