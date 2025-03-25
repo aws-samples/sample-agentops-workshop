@@ -98,11 +98,62 @@ class AiAgentPipelineStack(Stack):
             self, "FunctionalAgent",
             type="AWS::Bedrock::Agent",
             properties={
-                "AgentName": "GeneralQuestionsExpert",
+                "AgentName": "ElectronicsManufacturingExpert",
                 "AgentResourceRoleArn": agent_role.role_arn,
                 "FoundationModel": "anthropic.claude-3-sonnet-20240229-v1:0",
-                "Instruction": """You are a bedrock agent that answers general questions""",
-                "Description": "General Question Agent",
+                "Instruction": """You are an Electronics Manufacturing Expert Agent specializing in electronic component manufacturing, assembly processes, and quality control. 
+
+                        Core Knowledge Areas:
+
+                        1. Manufacturing Processes:
+                        - PCB fabrication and assembly techniques
+                        - Surface-mount technology (SMT) and through-hole assembly
+                        - Soldering standards and best practices
+                        - Clean room protocols and requirements
+                        - Production line optimization
+
+                        2. Electronic Components:
+                        - Component specifications and tolerances
+                        - Parts selection and compatibility
+                        - Component lifecycle management
+                        - Inventory control best practices
+                        - Component obsolescence management
+
+                        3. Quality Control:
+                        - IPC standards implementation
+                        - Testing procedures (ICT, FCT, AOI)
+                        - Defect analysis and prevention
+                        - Statistical process control (SPC)
+                        - Reliability testing methods
+
+                        4. Industry Standards:
+                        - IPC standards (IPC-A-610, IPC-J-STD-001)
+                        - ISO 9001 requirements
+                        - ESD protection protocols
+                        - RoHS and REACH compliance
+                        - Industry 4.0 implementation
+
+                        Response Guidelines:
+                        - Provide specific technical details and parameters when discussing processes
+                        - Include relevant industry standards and compliance requirements
+                        - Emphasize quality control checkpoints and testing procedures
+                        - Consider manufacturability and scalability in recommendations
+                        - Reference appropriate safety protocols and environmental compliance
+
+                        When responding to queries:
+                        1. First assess the specific manufacturing context
+                        2. Consider applicable industry standards
+                        3. Provide detailed technical specifications
+                        4. Include quality control requirements
+                        5. Note any relevant compliance considerations
+
+                        Always maintain focus on:
+                        - Manufacturing quality and reliability
+                        - Process efficiency and optimization
+                        - Industry standard compliance
+                        - Safety and environmental regulations
+                        - Cost-effective solutions while maintaining quality standards""",
+                "Description": "Electronics Manufacturing Expert Agent",
                 "IdleSessionTTLInSeconds": 1800
             }
         )
@@ -121,87 +172,87 @@ class AiAgentPipelineStack(Stack):
 
         #Create Lambda Function to Integrate with API Gateway
         # Create IAM role for Lambda with Bedrock permissions - Leave commented until ready to use
-        # bedrock_lambda_role = iam.Role(
-        #     self, 'BedrockLambdaRole',
-        #     assumed_by=iam.ServicePrincipal('lambda.amazonaws.com')
-        # )
+        bedrock_lambda_role = iam.Role(
+            self, 'BedrockLambdaRole',
+            assumed_by=iam.ServicePrincipal('lambda.amazonaws.com')
+        )
 
         # Add Bedrock permissions - Leave commented until ready to use
-        # bedrock_lambda_role.add_to_policy(iam.PolicyStatement(
-        #     effect=iam.Effect.ALLOW,
-        #     actions=[
-        #         'bedrock:InvokeModel',
-        #         'bedrock:InvokeAgent'  # Add this permission
-        #     ],
-        #     resources=['*']
-        # ))
+        bedrock_lambda_role.add_to_policy(iam.PolicyStatement(
+            effect=iam.Effect.ALLOW,
+            actions=[
+                'bedrock:InvokeModel',
+                'bedrock:InvokeAgent'  # Add this permission
+            ],
+            resources=['*']
+        ))
 
         # Basic Lambda CloudWatch permissions - Leave commented until ready to use
-        # bedrock_lambda_role.add_managed_policy(
-        #     iam.ManagedPolicy.from_aws_managed_policy_name('service-role/AWSLambdaBasicExecutionRole')
-        # )
+        bedrock_lambda_role.add_managed_policy(
+            iam.ManagedPolicy.from_aws_managed_policy_name('service-role/AWSLambdaBasicExecutionRole')
+        )
 
         # Create Lambda function for Bedrock integration - Leave commented until ready to use
-        # bedrock_lambda = lambda_.Function(
-        #     self, 'BedrockLambdaFunction',
-        #     runtime=lambda_.Runtime.PYTHON_3_9,
-        #     handler='index.handler',
-        #     code=lambda_.Code.from_asset('lambda/tools'),
-        #     timeout=Duration.minutes(5),
-        #     memory_size=256,
-        #     role=bedrock_lambda_role,
-        #     environment={
-        #         'POWERTOOLS_SERVICE_NAME': 'bedrock-api',
-        #         'LOG_LEVEL': 'INFO',
-        #         'BEDROCK_AGENT_ID': bedrock_agent_functional.ref,
-        #         'BEDROCK_AGENT_ALIAS_ID': Token.as_string(bedrock_agent_functional_alias.get_att("AgentAliasId"))
-        #     }
-        # )
+        bedrock_lambda = lambda_.Function(
+            self, 'BedrockLambdaFunction',
+            runtime=lambda_.Runtime.PYTHON_3_9,
+            handler='index.handler',
+            code=lambda_.Code.from_asset('lambda/tools'),
+            timeout=Duration.minutes(5),
+            memory_size=256,
+            role=bedrock_lambda_role,
+            environment={
+                'POWERTOOLS_SERVICE_NAME': 'bedrock-api',
+                'LOG_LEVEL': 'INFO',
+                'BEDROCK_AGENT_ID': bedrock_agent_functional.ref,
+                'BEDROCK_AGENT_ALIAS_ID': Token.as_string(bedrock_agent_functional_alias.get_att("AgentAliasId"))
+            }
+        )
         # Create API Gateway REST API - Leave commented until ready to use
-        # api = aws_apigateway.RestApi(
-        #     self, 'BedrockApi',
-        #     rest_api_name='Bedrock Integration API',
-        #     description='API Gateway integration with Amazon Bedrock'
-        # )
+        api = aws_apigateway.RestApi(
+            self, 'BedrockApi',
+            rest_api_name='Bedrock Integration API',
+            description='API Gateway integration with Amazon Bedrock'
+        )
 
         # Create API Gateway integration with Lambda - Leave commented until ready to use
-        # integration = aws_apigateway.LambdaIntegration(
-        #     bedrock_lambda,
-        #     proxy=True,
-        #     integration_responses=[{
-        #         'statusCode': '200',
-        #         'responseParameters': {
-        #             'method.response.header.Access-Control-Allow-Origin': "'*'"
-        #         }
-        #     }]
-        # )
+        integration = aws_apigateway.LambdaIntegration(
+            bedrock_lambda,
+            proxy=True,
+            integration_responses=[{
+                'statusCode': '200',
+                'responseParameters': {
+                    'method.response.header.Access-Control-Allow-Origin': "'*'"
+                }
+            }]
+        )
 
         # Add POST method to API Gateway - Leave commented until ready to use
-        # api_resource = api.root.add_resource('invoke')
-        # api_resource.add_method(
-        #     'POST',
-        #     integration,
-        #     method_responses=[{
-        #         'statusCode': '200',
-        #         'responseParameters': {
-        #             'method.response.header.Access-Control-Allow-Origin': True
-        #         }
-        #     }]
-        # )
+        api_resource = api.root.add_resource('invoke')
+        api_resource.add_method(
+            'POST',
+            integration,
+            method_responses=[{
+                'statusCode': '200',
+                'responseParameters': {
+                    'method.response.header.Access-Control-Allow-Origin': True
+                }
+            }]
+        )
 
         # Enable CORS - Leave commented until ready to use
-        # api_resource.add_cors_preflight(
-        #     allow_origins=['*'],
-        #     allow_methods=['POST'],
-        #     allow_headers=['Content-Type', 'Authorization']
-        # )
+        api_resource.add_cors_preflight(
+            allow_origins=['*'],
+            allow_methods=['POST'],
+            allow_headers=['Content-Type', 'Authorization']
+        )
 
         # Output the API endpoint URL - Leave commented until ready to use
-        # CfnOutput(
-        #     self, 'ApiEndpoint',
-        #     value=f'{api.url}invoke',
-        #     description='API Gateway endpoint URL'
-        # )
+        CfnOutput(
+            self, 'ApiEndpoint',
+            value=f'{api.url}invoke',
+            description='API Gateway endpoint URL'
+        )
 
         # Create IAM roles
         batch_service_role = iam.Role(
@@ -375,3 +426,132 @@ class AiAgentPipelineStack(Stack):
                 left=[tools_function.metric_duration()]
             )
         )
+        q_business_plugin = CfnResource(
+         self, "QBusinessPlugin",
+         type="AWS::QBusiness::Plugin",
+         properties={
+             "ApplicationId": app_id,
+             "DisplayName" : "my-new-plugin",
+             "Type" : "CUSTOM",
+             "AuthConfiguration" : {
+                 "NoAuthConfiguration": {}
+             },
+             "CustomPluginConfiguration" : {
+                 "ApiSchema" : {
+                     
+                     "Payload" : """{
+                         "openapi": "3.0.0",
+                         "info": {
+                             "title": "Bedrock Integration API",
+                             "description": "API Gateway integration with Amazon Bedrock",
+                             "version": "1.0.0"
+                         },
+                         "servers": [
+                             {
+                                 "url": "https://r6arsdd1fh.execute-api.us-west-2.amazonaws.com/prod"
+                             }
+                         ],
+                         "paths": {
+                             "/invoke": {
+                                 "post": {
+                                     "summary": "Invoke Bedrock Agent",
+                                     "description": "Sends a prompt to the Bedrock agent and returns the agent's response",
+                                     "operationId": "invokeAgent",
+                                     "requestBody": {
+                                         "required": true,
+                                         "content": {
+                                             "application/json": {
+                                                 "schema": {
+                                                     "$ref": "#/components/schemas/InvokeRequest"
+                                                 }
+                                             }
+                                         }
+                                     },
+                                     "responses": {
+                                         "200": {
+                                             "description": "Successful response from the agent",
+                                             "content": {
+                                                 "application/json": {
+                                                     "schema": {
+                                                         "$ref": "#/components/schemas/InvokeResponse"
+                                                     }
+                                                 }
+                                             }
+                                         },
+                                         "400": {
+                                             "description": "Bad request - missing prompt",
+                                             "content": {
+                                                 "application/json": {
+                                                     "schema": {
+                                                         "$ref": "#/components/schemas/ErrorResponse"
+                                                     }
+                                                 }
+                                             }
+                                         },
+                                         "500": {
+                                             "description": "Internal server error",
+                                             "content": {
+                                                 "application/json": {
+                                                     "schema": {
+                                                         "$ref": "#/components/schemas/ErrorResponse"
+                                                     }
+                                                 }
+                                             }
+                                         }
+                                     }
+                                 }
+                             }
+                         },
+                         "components": {
+                             "schemas": {
+                                 "InvokeRequest": {
+                                     "type": "object",
+                                     "properties": {
+                                         "prompt": {
+                                             "type": "string",
+                                             "description": "The input text to send to the Bedrock agent"
+                                         },
+                                         "sessionId": {
+                                             "type": "string",
+                                             "description": "Optional session ID for the conversation (UUID will be generated if not provided)"
+                                         }
+                                     },
+                                     "required": ["prompt"]
+                                 },
+                                 "InvokeResponse": {
+                                     "type": "object",
+                                     "properties": {
+                                         "agentId": {
+                                             "type": "string",
+                                             "description": "The ID of the Bedrock agent that processed the request"
+                                         },
+                                         "response": {
+                                             "type": "string",
+                                             "description": "The agent's response to the prompt"
+                                         },
+                                         "sessionId": {
+                                             "type": "string",
+                                             "description": "The session ID for the conversation"
+                                         }
+                                     },
+                                     "required": ["agentId", "response", "sessionId"]
+                                 },
+                                 "ErrorResponse": {
+                                     "type": "object",
+                                     "properties": {
+                                         "error": {
+                                             "type": "string",
+                                             "description": "Error message describing what went wrong"
+                                         }
+                                     },
+                                     "required": ["error"]
+                                 }
+                             }
+                         }
+                         }"""
+                 },
+                 "ApiSchemaType" : "OPEN_API_V3",
+                 "Description" : "plugin description"
+             },
+         }
+     )
