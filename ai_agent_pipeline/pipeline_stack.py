@@ -152,7 +152,7 @@ class AiAgentPipelineStack(Stack):
         #@)
 
         #@# Add POST method to API Gateway
-        #@ api_resource = api.root.add_resource('invoke')
+        #@api_resource = api.root.add_resource('invoke')
         #@api_resource.add_method(
         #@     'POST',
         #@     integration,
