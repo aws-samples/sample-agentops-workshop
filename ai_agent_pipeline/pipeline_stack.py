@@ -95,88 +95,88 @@ class AiAgentPipelineStack(Stack):
         CfnOutput(self, "FunctionalAgentId", value=bedrock_agent_functional.ref)
 
         #Create Lambda Function to Integrate with API Gateway
-        # Create IAM role for Lambda with Bedrock permissions - Leave commented until ready to use
-        # bedrock_lambda_role = iam.Role(
-        #     self, 'BedrockLambdaRole',
-        #     assumed_by=iam.ServicePrincipal('lambda.amazonaws.com')
-        # )
+        #@# Create IAM role for Lambda with Bedrock permissions
+        #@bedrock_lambda_role = iam.Role(
+        #@     self, 'BedrockLambdaRole',
+        #@     assumed_by=iam.ServicePrincipal('lambda.amazonaws.com')
+        #@)
 
-        # Add Bedrock permissions - Leave commented until ready to use
-        # bedrock_lambda_role.add_to_policy(iam.PolicyStatement(
-        #     effect=iam.Effect.ALLOW,
-        #     actions=[
-        #         'bedrock:InvokeModel',
-        #         'bedrock:InvokeAgent'  # Add this permission
-        #     ],
-        #     resources=['*']
-        # ))
+        #@# Add Bedrock permissions
+        #@bedrock_lambda_role.add_to_policy(iam.PolicyStatement(
+        #@     effect=iam.Effect.ALLOW,
+        #@     actions=[
+        #@         'bedrock:InvokeModel',
+        #@         'bedrock:InvokeAgent'  # Add this permission
+        #@     ],
+        #@     resources=['*']
+        #@))
 
-        # Basic Lambda CloudWatch permissions - Leave commented until ready to use
-        # bedrock_lambda_role.add_managed_policy(
-        #     iam.ManagedPolicy.from_aws_managed_policy_name('service-role/AWSLambdaBasicExecutionRole')
-        # )
+        #@# Basic Lambda CloudWatch permissions
+        #@bedrock_lambda_role.add_managed_policy(
+        #@     iam.ManagedPolicy.from_aws_managed_policy_name('service-role/AWSLambdaBasicExecutionRole')
+        #@)
 
-        # Create Lambda function for Bedrock integration - Leave commented until ready to use
-        # bedrock_lambda = lambda_.Function(
-        #     self, 'BedrockLambdaFunction',
-        #     runtime=lambda_.Runtime.PYTHON_3_9,
-        #     handler='index.handler',
-        #     code=lambda_.Code.from_asset('lambda/tools'),
-        #     timeout=Duration.minutes(5),
-        #     memory_size=256,
-        #     role=bedrock_lambda_role,
-        #     environment={
-        #         'POWERTOOLS_SERVICE_NAME': 'bedrock-api',
-        #         'LOG_LEVEL': 'INFO',
-        #         'BEDROCK_AGENT_ID': bedrock_agent_functional.ref,
-        #         'BEDROCK_AGENT_ALIAS_ID': Token.as_string(bedrock_agent_functional_alias.get_att("AgentAliasId"))
-        #     }
-        # )
-        # Create API Gateway REST API - Leave commented until ready to use
-        # api = aws_apigateway.RestApi(
-        #     self, 'BedrockApi',
-        #     rest_api_name='Bedrock Integration API',
-        #     description='API Gateway integration with Amazon Bedrock'
-        # )
+        #@# Create Lambda function for Bedrock integration
+        #@bedrock_lambda = lambda_.Function(
+        #@     self, 'BedrockLambdaFunction',
+        #@     runtime=lambda_.Runtime.PYTHON_3_9,
+        #@     handler='index.handler',
+        #@     code=lambda_.Code.from_asset('lambda/tools'),
+        #@     timeout=Duration.minutes(5),
+        #@     memory_size=256,
+        #@     role=bedrock_lambda_role,
+        #@     environment={
+        #@         'POWERTOOLS_SERVICE_NAME': 'bedrock-api',
+        #@         'LOG_LEVEL': 'INFO',
+        #@         'BEDROCK_AGENT_ID': bedrock_agent_functional.ref,
+        #@         'BEDROCK_AGENT_ALIAS_ID': Token.as_string(bedrock_agent_functional_alias.get_att("AgentAliasId"))
+        #@     }
+        #@)
+        #@# Create API Gateway REST API
+        #@api = aws_apigateway.RestApi(
+        #@     self, 'BedrockApi',
+        #@     rest_api_name='Bedrock Integration API',
+        #@     description='API Gateway integration with Amazon Bedrock'
+        #@ )
 
-        # Create API Gateway integration with Lambda - Leave commented until ready to use
-        # integration = aws_apigateway.LambdaIntegration(
-        #     bedrock_lambda,
-        #     proxy=True,
-        #     integration_responses=[{
-        #         'statusCode': '200',
-        #         'responseParameters': {
-        #             'method.response.header.Access-Control-Allow-Origin': "'*'"
-        #         }
-        #     }]
-        # )
+        #@# Create API Gateway integration with Lambda
+        #@integration = aws_apigateway.LambdaIntegration(
+        #@     bedrock_lambda,
+        #@     proxy=True,
+        #@     integration_responses=[{
+        #@         'statusCode': '200',
+        #@         'responseParameters': {
+        #@             'method.response.header.Access-Control-Allow-Origin': "'*'"
+        #@         }
+        #@     }]
+        #@)
 
-        # Add POST method to API Gateway - Leave commented until ready to use
-        # api_resource = api.root.add_resource('invoke')
-        # api_resource.add_method(
-        #     'POST',
-        #     integration,
-        #     method_responses=[{
-        #         'statusCode': '200',
-        #         'responseParameters': {
-        #             'method.response.header.Access-Control-Allow-Origin': True
-        #         }
-        #     }]
-        # )
+        #@# Add POST method to API Gateway
+        #@api_resource = api.root.add_resource('invoke')
+        #@api_resource.add_method(
+        #@     'POST',
+        #@     integration,
+        #@     method_responses=[{
+        #@         'statusCode': '200',
+        #@         'responseParameters': {
+        #@             'method.response.header.Access-Control-Allow-Origin': True
+        #@         }
+        #@     }]
+        #@)
 
-        # Enable CORS - Leave commented until ready to use
-        # api_resource.add_cors_preflight(
-        #     allow_origins=['*'],
-        #     allow_methods=['POST'],
-        #     allow_headers=['Content-Type', 'Authorization']
-        # )
+        #@# Enable CORS
+        #@api_resource.add_cors_preflight(
+        #@     allow_origins=['*'],
+        #@     allow_methods=['POST'],
+        #@     allow_headers=['Content-Type', 'Authorization']
+        #@)
 
-        # Output the API endpoint URL - Leave commented until ready to use
-        # CfnOutput(
-        #     self, 'ApiEndpoint',
-        #     value=f'{api.url}invoke',
-        #     description='API Gateway endpoint URL'
-        # )
+        #@# Output the API endpoint URL
+        #@CfnOutput(
+        #@     self, 'ApiEndpoint',
+        #@     value=f'{api.url}invoke',
+        #@     description='API Gateway endpoint URL'
+        #@)
 
 
         # Your existing Lambda function
